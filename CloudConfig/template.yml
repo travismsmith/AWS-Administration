@@ -1,0 +1,103 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Create S3, SNS and IAM Roles for CloudConfig'
+Parameters:
+    EmailAddress:
+        Type: 'String'
+Resources:
+    IAMRoleConfig:
+        Type: 'AWS::IAM::Role'
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                    -
+                        Effect: 'Allow'
+                        Principal:
+                            Service:
+                                - 'config.amazonaws.com'
+                        Action:
+                            - 'sts:AssumeRole'
+            ManagedPolicyArns:
+                - 'arn:aws:iam::aws:policy/service-role/AWSConfigRole'
+            Policies:
+                -
+                    PolicyName: 'S3'
+                    PolicyDocument:
+                        Version: '2012-10-17'
+                        Statement:
+                            -
+                                Effect: 'Allow'
+                                Action:
+                                    - 's3:PutObject'
+                                Resource:
+                                    - 
+                                        Fn::Join:
+                                            - ''
+                                            -
+                                                -
+                                                    Fn::GetAtt:
+                                                        - S3BucketConfig
+                                                        - Arn
+                                                - '/AWSLogs/*'
+                            -
+                                Effect: 'Allow'
+                                Action:
+                                    - 's3:GetBucketAcl'
+                                Resource:
+                                    -
+                                        Fn::GetAtt:
+                                            - S3BucketConfig
+                                            - Arn
+                                Condition:
+                                    StringLike:
+                                        s3:x-amz-acl: 'bucket-owner-full-control'
+                -
+                    PolicyName: 'SNS'
+                    PolicyDocument:
+                        Version: '2012-10-17'
+                        Statement:
+                            -
+                                Effect: 'Allow'
+                                Action:
+                                    - 'sns:Publish'
+                                Resource:
+                                    - 
+                                        Ref: SNSTopicConfig
+            Path: '/'
+    S3BucketConfig:
+        Type: 'AWS::S3::Bucket'
+        Properties:
+            BucketName:
+                Fn::Join:
+                    - ''
+                    -
+                        - 'config-bucket-'
+                        -
+                            Ref: AWS::AccountId
+            Tags:
+                -
+                    Key: 'Role'
+                    Value: 'Administration'
+    SNSTopicConfig: 
+        Type: 'AWS::SNS::Topic'
+        Properties: 
+            Subscription: 
+            - 
+                Endpoint: 
+                    Ref: EmailAddress
+                Protocol: 'email'
+Outputs:
+    SNSTopicArn:
+        Description: 'SNS Topic ARN'
+        Value:
+            Ref: SNSTopicConfig
+    S3BucketName:
+        Description: 'S3 Bucket Name'
+        Value:
+            Ref: S3BucketConfig
+    IAMRoleArn:
+        Description: 'IAM Role Arn'
+        Value:
+            Fn::GetAtt:
+                - IAMRoleConfig
+                - Arn
