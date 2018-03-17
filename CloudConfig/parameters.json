@@ -1,6 +1,10 @@
 [
-  {
-    "ParameterKey": "EmailAddress",
-    "ParameterValue": "email@example.com"
-  } 
+    {
+        "ParameterKey": "Name",
+        "ParameterValue": "AWS-Config"
+    },
+    {
+        "ParameterKey": "EmailAddress",
+        "ParameterValue": "email@example.com"
+    } 
 ]
