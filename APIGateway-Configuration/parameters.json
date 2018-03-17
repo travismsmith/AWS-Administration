@@ -1,0 +1,14 @@
+[
+  {
+    "ParameterKey": "Name",
+    "ParameterValue": "APIGateway-Configuration"
+  },
+  {
+    "ParameterKey": "DomainName",
+    "ParameterValue": "api.example.com"
+  },
+  {
+    "ParameterKey": "HostedZoneId",
+    "ParameterValue": ""
+  }
+]
