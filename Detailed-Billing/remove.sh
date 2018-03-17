@@ -1,8 +1,11 @@
-profile=${1:-default}
-name="detailed-billing"
+#!/bin/sh
 
-echo Stack Name: $name
-echo Deleting Stack
+# Paramters
+parameters="parameters.json"
+name=`jq -r '.[] | select(.ParameterKey=="Name") | .ParameterValue' $parameters`
+profile=${1:-default}
+
+echo "Deleting Stack: $name"
 aws cloudformation update-termination-protection \
     --no-enable-termination-protection \
     --stack-name $name \

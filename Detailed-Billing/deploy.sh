@@ -1,30 +1,42 @@
+#!/bin/sh
+
+# Paramters
+capabilities=""
+parameters="parameters.json"
+name=`jq -r '.[] | select(.ParameterKey=="Name") | .ParameterValue' $parameters`
 profile=${1:-default}
-template="file://template.yml"
-name="detailed-billing"
+template="template.yml"
 
-echo Stack Name: $name
-
-STACK=`aws cloudformation list-stack-resources \
-    --stack-name $name \
-    --profile $profile &> /dev/null`
+# Check if stack exists
+aws cloudformation list-stack-resources \
+    --profile $profile \
+    --stack-name $name &> /dev/null
 
 if [ $? -eq 0 ]; then
-    echo Updating Stack
+# Update the existing stack
+    echo "Updating Stack: $name"
     aws cloudformation update-stack \
-        --template-body $template \
+        --capabilities CAPABILITY_IAM \
+        --parameters "file://$parameters" \
+        --profile $profile \
         --stack-name $name \
-        --profile $profile
+        --tags "Key=Name,Value=$name" \
+        --template-body "file://$template"
     aws cloudformation wait stack-update-complete \
-        --stack-name $name \
-        --profile $profile
+        --profile $profile \
+        --stack-name $name
 else
-    echo Creating Stack
+# create a new stack
+    echo "Creating Stack: $name"
     aws cloudformation create-stack \
-        --template-body $template \
-        --stack-name $name \
+        --capabilities $capabilities \
         --enable-termination-protection \
-        --profile $profile
-    aws cloudformation wait stack-create-complete \
+        --parameters "file://$parameters" \
+        --profile $profile \
         --stack-name $name \
-        --profile $profile
+        --tags "Key=Name,Value=$name" \
+        --template-body "file://$template"
+    aws cloudformation wait stack-create-complete \
+        --profile $profile \
+        --stack-name $name
 fi

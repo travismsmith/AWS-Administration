@@ -1,45 +1,31 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: 'Create S3Bucket for Detailed Billing Reports or Cost and Usage Reports'
+Parameters:
+  Name:
+    Type: 'String'
 Resources:
-    S3BucketBilling:
-        Type: 'AWS::S3::Bucket'
-        Properties:
-            BucketName:
-                Fn::Sub:
-                     'detailed-billing-${AWS::AccountId}'
-    S3BucketPolicy:
-        Type: 'AWS::S3::BucketPolicy'
-        Properties:
-            Bucket:
-                Ref:
-                    'S3BucketBilling'
-            PolicyDocument:
-                Statement:
-                    -
-                        Effect: 'Allow'
-                        Action:
-                            - 's3:GetBucketAcl'
-                            - 's3:GetBucketPolicy'
-                        Principal:
-                            AWS:
-                                'arn:aws:iam::386209384616:root'
-                        Resource:
-                            Fn::GetAtt:
-                                - 'S3BucketBilling'
-                                - 'Arn'
-                    -
-                        Effect: 'Allow'
-                        Action:
-                            - 's3:PutObject'
-                        Principal:
-                            AWS:
-                                'arn:aws:iam::386209384616:root'
-                        Resource:
-                            Fn::Join:
-                                - ''
-                                -
-                                    - 
-                                        Fn::GetAtt:
-                                            - 'S3BucketBilling'
-                                            - 'Arn'
-                                    - '/*'
+  S3BucketBilling:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: !Sub 'detailed-billing-${AWS::AccountId}'
+  S3BucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref 'S3BucketBilling'
+      PolicyDocument:
+        Statement:
+          - Effect: 'Allow'
+            Action:
+              - 's3:GetBucketAcl'
+              - 's3:GetBucketPolicy'
+            Principal:
+              AWS: 'arn:aws:iam::386209384616:root'
+            Resource: !GetAtt 'S3BucketBilling.Arn'
+          - Effect: 'Allow'
+            Action:
+              - 's3:PutObject'
+            Principal:
+              AWS: 'arn:aws:iam::386209384616:root'
+            Resource: !Sub
+              - ${BucketArn}/*
+              - BucketArn: !GetAtt 'S3BucketBilling.Arn'
