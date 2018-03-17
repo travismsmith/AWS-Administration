@@ -1,3 +1,4 @@
+---
 AWSTemplateFormatVersion: "2010-09-09"
 Description: 'Create S3Bucket for Detailed Billing Reports or Cost and Usage Reports'
 Parameters:
