@@ -8,6 +8,11 @@ Resources:
     Type: 'AWS::S3::Bucket'
     Properties:
       BucketName: !Sub 'detailed-billing-${AWS::AccountId}'
+      Tags:
+        - Key: 'Name'
+          Value: 'Billing Bucket'
+        - Key: 'Role'
+          Value: 'Administration'
   S3BucketPolicy:
     Type: 'AWS::S3::BucketPolicy'
     Properties:
@@ -27,5 +32,9 @@ Resources:
             Principal:
               AWS: 'arn:aws:iam::386209384616:root'
             Resource: !Sub
-              - ${BucketArn}/*
+              - '${BucketArn}/*'
               - BucketArn: !GetAtt 'S3BucketBilling.Arn'
+Outputs:
+  S3Bucket:
+    Description: 'S3 Bucket for Billing Reports'
+    Value: !Ref 'S3BucketBilling'
